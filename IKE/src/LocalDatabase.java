@@ -146,7 +146,7 @@ public class LocalDatabase {
 		String query = 
 				"CREATE TABLE IF NOT EXISTS Listenings (" 							+
 				"user			VARCHAR(128)," 										+
-				"listens_to		VARCHAR(259)," 										+
+				"track			VARCHAR(259)," 										+
 				"playcount		INTEGER," 											+ 
 				"FOREIGN KEY (user) REFERENCES Persons(lfm_username)," 				+
 				"FOREIGN KEY (listens_to) REFERENCES Recordings(unique_track)"		+
@@ -246,6 +246,7 @@ public class LocalDatabase {
 					prep.setString(1, t.getArtist());
 					prep.setString(2, t.getName());
 					prep.addBatch();
+					System.out.println("Added " +t.getArtist()+ ", " +t.getName()+" to recordings");
 				}
 				
 				conn.setAutoCommit(false);
@@ -273,12 +274,8 @@ public class LocalDatabase {
 				
 				for (Track t : tracks) 
 				{
-					System.out.println("User= "+ u.getName());
-					System.out.println("Playcount= "+ t.getPlaycount());
-					System.out.println("Trackname= " +t.getName());
 					if(u.getName() != null && t.getPlaycount() >5 && t.getName() != null)
 					{
-						System.out.println("User= "+ u.getName() + ", Playcount= "+ t.getPlaycount()+ ", Trackname= " +t.getName());
 						prep.setString(1, u.getName());
 						prep.setString(2, t.getName());
 						prep.setInt(3, t.getPlaycount());
@@ -429,10 +426,18 @@ public class LocalDatabase {
 				{
 					if(u!=null)
 					{
-						System.out.println(u.getName());
-						User.getTopTracks(u.getName(), key);
-						insertDataIntoListenings(u, User.getTopTracks(u.getName(), key));
-						System.out.println("user added to listenings");
+						try
+						{
+							Collection<Track> tracks = User.getTopTracks(u.getName(), key);
+							insertDataIntoListenings(u, tracks);
+							System.out.println(u.getName()+" added to listenings");
+							insertDataIntoRecordings(tracks);
+							System.out.println(u.getName()+"s' tracks added to recordings");
+						}
+						catch(Exception e)
+						{
+							System.out.println("Invalid Used data while adding to listeners");
+						}
 					}
 				}
 			}
