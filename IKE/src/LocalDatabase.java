@@ -146,7 +146,7 @@ public class LocalDatabase {
 		String query = 
 				"CREATE TABLE IF NOT EXISTS Listenings (" 							+
 				"user			VARCHAR(128)," 										+
-				"track			VARCHAR(259)," 										+
+				"listen_to		VARCHAR(259)," 										+
 				"playcount		INTEGER," 											+ 
 				"FOREIGN KEY (user) REFERENCES Persons(lfm_username)," 				+
 				"FOREIGN KEY (listens_to) REFERENCES Recordings(unique_track)"		+
@@ -402,7 +402,7 @@ public class LocalDatabase {
 		local.openConnection();
 		local.createTablePersons();
 		local.createTableListenings();
-		local.createTableRecordings();
+		//local.createTableRecordings();
 		local.closeConnection();
 		return local;
 	}
