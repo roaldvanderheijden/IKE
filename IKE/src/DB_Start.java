@@ -11,6 +11,5 @@ public class DB_Start {
 		LocalDatabase dbm = new LocalDatabase("Last.FM");
 		DB_AddView dbv = new DB_AddView(dbm);
 		dbv.buildGUI();
-
 	}
 }
