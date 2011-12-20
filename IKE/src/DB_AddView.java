@@ -159,7 +159,18 @@ public class DB_AddView extends JFrame implements Observer {
 		 */
 		public void actionPerformed(ActionEvent e) 
 		{
-			local.fillLocalDatabase(artistName_field.getText(), trackTitle_field.getText());
+			if(artistName_field.getText() == null || trackTitle_field.getText() == null)
+			{
+				System.out.println("Please fill in the artist and track field correctly");
+			}
+			else if(numUsers_field.getText() == null || Integer.parseInt(numUsers_field.getText()) < 0)
+			{
+				System.out.println("Please fill in a positive number as maximum number of users");
+			}
+			else
+			{
+				local.fillLocalDatabase(artistName_field.getText(), trackTitle_field.getText(), Integer.parseInt(numUsers_field.getText()));
+			}
 		}
 		
 		/**

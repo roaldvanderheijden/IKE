@@ -108,17 +108,16 @@ public class LocalDatabase {
 	 */
 	protected void createTablePersons() {
 		String query = 
-				"CREATE TABLE IF NOT EXISTS Persons (" 	+
-				"lfm_username	VARCHAR(128)," 			+
-				"age 			INTEGER," 				+
-				"country		VARCHAR(128),"	 		+
-				"language		VARCHAR(64),"	 		+
-				"gender			VARCHAR(8),"			+
-				"register_date	INTEGER,"			+
-				"real_name		VARCHAR(32),"			+
-				"playcount		INTEGER,"			+
-				"playlists		INTEGER,"			+
-				"PRIMARY KEY 	(lfm_username)"			+
+				"CREATE TABLE IF NOT EXISTS Persons (" 		+
+				"lfm_username	VARCHAR(128) PRIMARY KEY,"	+
+				"age 			INTEGER," 					+
+				"country		VARCHAR(128),"	 			+
+				"language		VARCHAR(64),"	 			+
+				"gender			VARCHAR(8),"				+
+				"register_date	INTEGER,"					+
+				"real_name		VARCHAR(32),"				+
+				"playcount		INTEGER,"					+
+				"playlists		INTEGER"					+
 				");"
 				;
 		createTable(query);
@@ -133,7 +132,7 @@ public class LocalDatabase {
 				"CREATE TABLE IF NOT EXISTS Recordings (" 							+
 				"artist_name	VARCHAR(128)," 										+
 				"track_name		VARCHAR(128)," 										+
-				"CONSTRAINT unique_track PRIMARY KEY (artist_name, track_name)" 	+
+				"PRIMARY KEY (artist_name, track_name)" 							+
 				");"
 				;
 		createTable(query);
@@ -146,10 +145,11 @@ public class LocalDatabase {
 		String query = 
 				"CREATE TABLE IF NOT EXISTS Listenings (" 							+
 				"user			VARCHAR(128)," 										+
-				"track			VARCHAR(259)," 										+
-				"playcount		INTEGER," 											+ 
-				"FOREIGN KEY (user) REFERENCES Persons(lfm_username)," 				+
-				"FOREIGN KEY (listens_to) REFERENCES Recordings(unique_track)"		+
+				"artist         VARCHAR(128),"										+
+				"track			VARCHAR(256)," 										+
+				"playcount		INTEGER,"											+ 
+				"FOREIGN KEY(user) REFERENCES Persons(lfm_username)," 				+
+				"FOREIGN KEY(artist, track) REFERENCES Recordings(artist_name, track_name)" +
 				");"																
 				;
 		createTable(query);
@@ -270,15 +270,16 @@ public class LocalDatabase {
 	protected void insertDataIntoListenings(User u, Collection<Track> tracks) {
 			try 
 			{
-				PreparedStatement prep = conn.prepareStatement("INSERT INTO Listenings values (?, ?, ?);");
+				PreparedStatement prep = conn.prepareStatement("INSERT INTO Listenings values (?, ?, ?, ?);");
 				
 				for (Track t : tracks) 
 				{
 					if(u.getName() != null && t.getPlaycount() >5 && t.getName() != null)
 					{
 						prep.setString(1, u.getName());
-						prep.setString(2, t.getName());
-						prep.setInt(3, t.getPlaycount());
+						prep.setString(2, t.getArtist());
+						prep.setString(3, t.getName());
+						prep.setInt(4, t.getPlaycount());
 						prep.addBatch();
 					}
 				}
@@ -401,8 +402,8 @@ public class LocalDatabase {
 		local.loadDriver();
 		local.openConnection();
 		local.createTablePersons();
-		local.createTableListenings();
 		local.createTableRecordings();
+		local.createTableListenings();
 		local.closeConnection();
 		return local;
 	}
@@ -412,18 +413,19 @@ public class LocalDatabase {
 	 * Then it fills the listenings table for each of those users.
 	 * Then it fills recordings with the information of all tracks in database.
 	 * */
-	public void fillLocalDatabase(String artist, String track)
+	public void fillLocalDatabase(String artist, String track, int limit)
 	{
 		openConnection();
-		if(artist != null && track !=null)
+		Track t = external.getTrack(artist, track);
+		if (t!=null)
 		{
-			Track t = external.getTrack(artist, track);
-			if (t!=null)
+			Collection<User> users = external.getListeners(t);
+			insertDataIntoPersons(users);
+			for(User u : users)
 			{
-				Collection<User> users = external.getListeners(t);
-				insertDataIntoPersons(users);
-				for(User u : users)
+				if(limit > 0)
 				{
+					limit --;
 					if(u!=null)
 					{
 						try
