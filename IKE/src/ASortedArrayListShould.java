@@ -122,5 +122,5 @@ public class ASortedArrayListShould {
 //		assertEquals("101\n102\n103\n104\n", sal.print());
 //	}
 	// print moet nog
-	//
+	// setComparator en test + inner class
 }
