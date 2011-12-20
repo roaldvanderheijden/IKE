@@ -425,9 +425,9 @@ public class LocalDatabase {
 			{
 				if(limit > 0)
 				{
-					limit --;
 					if(u!=null)
 					{
+						limit --;
 						try
 						{
 							Collection<Track> tracks = User.getTopTracks(u.getName(), key);
