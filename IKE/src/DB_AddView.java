@@ -94,7 +94,13 @@ public class DB_AddView extends JFrame implements Observer {
 		nr = new JLabel("0");
 		
 		errorMSG = new JLabel("Error MSG: NONE :D");
-		go_add = new JButton("add");
+		//go_add = new JButton("add");
+		go_add = GUITools.makeClickableImageButton("ike", 
+					"fillLocalDbWithTestData", 
+					"If this button is pressed, new users from Last.FM\n" +
+					"will be added to the local database", 
+					"add Last.FM-users to the local db", 
+					"gif");
 		go_add.addActionListener(new DB_AddView_Controller());
 	}
 	
