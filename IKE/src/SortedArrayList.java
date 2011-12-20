@@ -101,11 +101,6 @@ public class SortedArrayList<E extends Comparable<E>> extends ArrayList<E>{
 			System.out.println(element.toString());
 	}
 	
-	public E get(int i)
-	{
-		return super.get(i);
-	}
-	
 	public void setComparator(Comparator<E> compare)
 	{
 		c = compare;
@@ -120,8 +115,4 @@ public class SortedArrayList<E extends Comparable<E>> extends ArrayList<E>{
         }
     }
 	
-//	public int size()
-//	{
-//		return lijst.size();
-//	}
 }

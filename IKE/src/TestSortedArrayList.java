@@ -14,7 +14,7 @@ public class TestSortedArrayList {
 	public static void main(String[] args) {
 		SortedArrayList<String> sal = new SortedArrayList<String>();
 		System.out.println(sal.add("E"));
-//		sal.print();
+		sal.print();
 		System.out.println(sal.add("A"));
 //		sal.print();
 		System.out.println(sal.add("B"));
