@@ -2,9 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/sqlitejdbc-v056.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="H:/IKEProject/last.fm-bindings-0.1.0.jar"/>
-	<classpathentry kind="lib" path="H:/Dropbox/share_IKE/iteration2of4/Code/sprintception phase 2/jar/sqlite.jar"/>
+	<classpathentry kind="lib" path="/home/thomas/Dropbox/share_IKE/iteration2of4/Code/sprintception phase 2/jar/last.fm-bindings-0.1.0.jar"/>
+	<classpathentry kind="lib" path="/home/thomas/Dropbox/share_IKE/iteration2of4/Code/sprintception phase 2/jar/sqlite.jar"/>
+	<classpathentry kind="lib" path="/home/thomas/Dropbox/share_IKE/iteration2of4/Code/sprintception phase 2/jar/sqlitejdbc-v056.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

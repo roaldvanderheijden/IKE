@@ -71,8 +71,6 @@ public class ALocalDatabaseShould {
 		db.createTablePersons();
 		assertEquals(db.hasTable("Listenings"), true);	
 	}
-	
-}
 				
 
 	/*
@@ -90,3 +88,4 @@ public class ALocalDatabaseShould {
 	 * Perhaps later junit-tests, that aren't too much boilerplate/lq, but not now.
 	 */
 
+}
