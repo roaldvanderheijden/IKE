@@ -26,7 +26,7 @@ public class RS_Model extends Observable {
 	/**
 	 * Interface used to handle connections to Last.FM-api in our application
 	 */
-	private RS_LastFMInterface DBI = new RS_LastFMInterface();
+	private DB_Handler DBI = new DB_Handler();
 	
 	/**
 	 * The class used to represent our recommendation algorithm, used in getting recommendations from our Last.FM Handler (RS_DBInterface)

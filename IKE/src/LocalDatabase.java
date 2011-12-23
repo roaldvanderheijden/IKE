@@ -18,21 +18,13 @@ public class LocalDatabase {
 	private boolean connectionOpened = false;
 	
 	/**
-	 * Initiate the two database. We want to write from the external to the local database.
-	 */
-	private RS_LastFMInterface external;
-	private String key = "d4a5cfedec3c607cc8c42123a632b5a5";
-	
-	
-	/**
 	 * Creates a database with given name
 	 * @param DBName, the name for the database file
 	 * @require DBName !=null;
 	 * @ensure this.DB_Exists()==TRUE;
 	 */
 	public LocalDatabase(String DBName) {
-		name = DBName;
-		external = new RS_LastFMInterface();		
+		name = DBName;	
 	}
 	
 	/**
@@ -108,16 +100,13 @@ public class LocalDatabase {
 	 */
 	protected void createTablePersons() {
 		String query = 
-				"CREATE TABLE IF NOT EXISTS Persons (" 		+
-				"lfm_username	VARCHAR(128) PRIMARY KEY,"	+
-				"age 			INTEGER," 					+
-				"country		VARCHAR(128),"	 			+
-				"language		VARCHAR(64),"	 			+
-				"gender			VARCHAR(8),"				+
-				"register_date	INTEGER,"					+
-				"real_name		VARCHAR(32),"				+
-				"playcount		INTEGER,"					+
-				"playlists		INTEGER"					+
+				"CREATE TABLE IF NOT EXISTS Persons (" 	+
+				"lfm_username	VARCHAR(128)," 			+
+				"age 			INTEGER," 				+
+				"country		VARCHAR(128),"	 		+
+				"language		VARCHAR(64),"	 		+
+				"gender			VARCHAR(8),"			+
+				"PRIMARY KEY 	(lfm_username)"			+
 				");"
 				;
 		createTable(query);
@@ -132,7 +121,7 @@ public class LocalDatabase {
 				"CREATE TABLE IF NOT EXISTS Recordings (" 							+
 				"artist_name	VARCHAR(128)," 										+
 				"track_name		VARCHAR(128)," 										+
-				"PRIMARY KEY (artist_name, track_name)" 							+
+				"CONSTRAINT unique_track PRIMARY KEY (artist_name, track_name)" 	+
 				");"
 				;
 		createTable(query);
@@ -145,11 +134,9 @@ public class LocalDatabase {
 		String query = 
 				"CREATE TABLE IF NOT EXISTS Listenings (" 							+
 				"user			VARCHAR(128)," 										+
-				"artist         VARCHAR(128),"										+
-				"track			VARCHAR(256)," 										+
-				"playcount		INTEGER,"											+ 
-				"FOREIGN KEY(user) REFERENCES Persons(lfm_username)," 				+
-				"FOREIGN KEY(artist, track) REFERENCES Recordings(artist_name, track_name)" +
+				"listens_to		VARCHAR(259)," 										+ 
+				"FOREIGN KEY (user) REFERENCES Persons(lfm_username)," 				+
+				"FOREIGN KEY (listens_to) REFERENCES Recordings(unique_track)"		+
 				");"																
 				;
 		createTable(query);
@@ -192,36 +179,32 @@ public class LocalDatabase {
 	 * @param DBName the name of the Database for which this method will insert example data.
 	 */
 	protected void insertDataIntoPersons(Collection<User> users) {
+		// what happens if data already there?
+		// big issue :(
+		
 			try {
 				openConnection();
-				PreparedStatement prep = conn.prepareStatement("INSERT INTO Persons VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);");
-				//HUGEST IF STATEMENT EVAAAAAAH
+				PreparedStatement prep = conn.prepareStatement("INSERT INTO Persons VALUES (?, ?, ?, ?, ?);");
 				for (User u : users) {
-					if
-					(
-							u.getName() != null && u.getCountry() != null && 
-							u.getLanguage() != null && u.getGender() != null && 
-							u.getRegisteredDate() != null && u.getRealname() != null && 
-							u.getPlaycount() != 0 && u.getAge() != 0 && u.getNumPlaylists() != 0
-					)
-					{
-						prep.setString(1, u.getName());
-						prep.setInt(2, u.getAge());
-						prep.setString(3, u.getCountry());
-						prep.setString(4, u.getLanguage());
-						prep.setString(5, u.getGender());
-						prep.setString(6, u.getRegisteredDate().toString());
-						prep.setString(7, u.getRealname());
-						prep.setInt(8, u.getPlaycount());
-						prep.setInt(9, u.getNumPlaylists());	
-						prep.addBatch();
-					}
+					if(u.getName() != null)
+					prep.setString(1, u.getName());
+					System.out.println(u.getName());
+					if(u.getAge() != 0)
+					prep.setInt(2, u.getAge());
+					if(u.getCountry() != null)
+					prep.setString(3, u.getCountry());
+					if(u.getLanguage() != null)
+					prep.setString(4, u.getLanguage());
+					if(u.getGender() != null)
+					prep.setString(5, u.getGender());
+					prep.addBatch();
 				}
 				
 				conn.setAutoCommit(false);
 	        	prep.executeBatch();
 	        	conn.setAutoCommit(true);
 	        	
+	        	conn.close();
 			} catch (SQLException e) {
 				System.out.println("Something went wrong with inserting batched data into Persons");
 				System.out.println("Check System.err for details");
@@ -246,13 +229,13 @@ public class LocalDatabase {
 					prep.setString(1, t.getArtist());
 					prep.setString(2, t.getName());
 					prep.addBatch();
-					System.out.println("Added " +t.getArtist()+ ", " +t.getName()+" to recordings");
 				}
 				
 				conn.setAutoCommit(false);
 	        	prep.executeBatch();
 	        	conn.setAutoCommit(true);
 	        	
+	        	conn.close();
 			} catch (SQLException e) {
 				System.out.println("Something went wrong with inserting batched data into Recordings");
 				System.out.println("Check System.err for details");
@@ -268,60 +251,55 @@ public class LocalDatabase {
 	 * @param DBName the name of the Database for which this method will insert example data.
 	 */
 	protected void insertDataIntoListenings(User u, Collection<Track> tracks) {
-			try 
-			{
-				PreparedStatement prep = conn.prepareStatement("INSERT INTO Listenings values (?, ?, ?, ?);");
+		// what happens if data already there?
+		// big issue :(
+		
+			try {
+				PreparedStatement prep = conn.prepareStatement("INSERT INTO Listenings values (?, ?, ?);");
 				
-				for (Track t : tracks) 
-				{
-					if(u.getName() != null && t.getPlaycount() >5 && t.getName() != null)
-					{
-						prep.setString(1, u.getName());
-						prep.setString(2, t.getArtist());
-						prep.setString(3, t.getName());
-						prep.setInt(4, t.getPlaycount());
-						prep.addBatch();
-					}
+				for (Track t : tracks) {
+					prep.setString(1, u.getName());
+					prep.setString(2, t.getName());
+					//DONNO IF THIS WORKS, LastFM Api doesnt show it but eclipse does....
+					prep.setInt(3, u.getPlaycount());
+					prep.addBatch();
 				}
 				
 				conn.setAutoCommit(false);
 	        	prep.executeBatch();
 	        	conn.setAutoCommit(true);
 	        	
-			} 
-			catch (SQLException e) 
-			{
+	        	conn.close();
+			} catch (SQLException e) {
 				System.out.println("Something went wrong with inserting batched data into Listenings");
 				System.out.println("Check System.err for details");
 				e.printStackTrace(System.err);
 			}
+			
 	}
 	
 	/**
 	 * Counts the number of entries in Persons table
 	 * @return the number of users in persons
 	 */
-	protected int countUsers() 
-	{
+	protected int countUsers() {
 		int result = -1;
 		try {
 			Statement stat = conn.createStatement();
+			System.out.println(stat.toString());
 			ResultSet rs = stat.executeQuery("SELECT COUNT(lfm_username) FROM Persons;");
-			System.out.println(rs.toString());
 			result = rs.getInt(1);
-		} 
-		catch (SQLException e) 
-		{
+		} catch (SQLException e) {
 			System.out.println("Something went wrong counting users from Persons");
 		}
+		
 		return result;
 	}
 	/**
 	 * Counts the number of entries in the designated table
 	 * @return the number of users in the designated table
 	 */
-	protected int countRows(String tableName) 
-	{
+	protected int countRows(String tableName) {
 		int result = -1;
 		
 		try {
@@ -329,9 +307,7 @@ public class LocalDatabase {
 			ResultSet rs = stat.executeQuery("select count(*) from " + tableName + ";");
 			result = rs.getInt(rs.getRow());
 			// freakin hell wat een @#*$@#($* werk om deze op te zoeken :/
-		} 
-		catch (SQLException e) 
-		{
+		} catch (SQLException e) {
 			System.out.println("Something went wrong counting users from Persons");
 		}
 		
@@ -392,58 +368,48 @@ public class LocalDatabase {
 		}
 		return tracks;
 	}
-	/**
-	 * Set up a basic local database ready for use. Just open connection on this one and ready to go!
-	 * Loads driver, opens connection to make the tables, closes connection = done ;)
-	 * */
+	
 	public static LocalDatabase dbSetup(String name)
 	{
 		LocalDatabase local = new LocalDatabase(name);
 		local.loadDriver();
 		local.openConnection();
 		local.createTablePersons();
-		local.createTableRecordings();
 		local.createTableListenings();
+		local.createTableRecordings();
 		local.closeConnection();
 		return local;
 	}
+
 	
-	/**
-	 * Method that fills the database. Takes a track and gets all top listeners form that track.
-	 * Then it fills the listenings table for each of those users.
-	 * Then it fills recordings with the information of all tracks in database.
-	 * */
-	public void fillLocalDatabase(String artist, String track, int limit)
+	public Collection<RS_Track> getTracks(String user)
 	{
-		openConnection();
-		Track t = external.getTrack(artist, track);
-		if (t!=null)
-		{
-			Collection<User> users = external.getListeners(t);
-			insertDataIntoPersons(users);
-			for(User u : users)
-			{
-				if(limit > 0)
-				{
-					if(u!=null)
-					{
-						limit --;
-						try
-						{
-							Collection<Track> tracks = User.getTopTracks(u.getName(), key);
-							insertDataIntoListenings(u, tracks);
-							System.out.println(u.getName()+" added to listenings");
-							insertDataIntoRecordings(tracks);
-							System.out.println(u.getName()+"s' tracks added to recordings");
-						}
-						catch(Exception e)
-						{
-							System.out.println("Invalid Used data while adding to listeners");
-						}
-					}
-				}
-			}
-		}
-		closeConnection();
+//		TODO
+		String query =
+			"SELECT artist_name, track_name FROM Recordings, Listenings "	+
+			"WHERE Recordings.unique_track = Listenings.unique_track "		+
+			"AND user = " + user + ";";
+		return selectTracksFromRecordings(query);
 	}
+
+	public Collection<RS_User> getListeners(Track t)
+	{
+		//TODO
+		String query =
+			"SELECT user.lfm_username AS lfm_username, age, country, language, gender FROM Persons, Listenings, Recordings "	+
+			"WHERE Persons.user = Listenings.user "		+
+			"AND Recordings.unique_track = Listenings.unique_track "	+
+			"AND artist_name = " + t.getArtist()	+
+			"AND track_name = " + t.getName() + ";";
+		return selectUsersFromPersons(query);
+	}
+	
 }
+
+	// 4 things you're busy doing...
+	// writing test
+	// writing prod code
+	// refactoring test
+	// refactoring prod code
+
+	// should we have used object serialization? or is sql scalable / will it help?

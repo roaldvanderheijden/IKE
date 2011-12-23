@@ -11,7 +11,7 @@ import de.umass.lastfm.User;
 
 public class RS_Algorithm_Improved implements RS_Algorithm {
 	
-	RS_LastFMInterface DB = new RS_LastFMInterface();
+	DB_Handler DB = new DB_Handler();
 	RS_Comparators comparators = new RS_Comparators();
 	
 	public RS_Algorithm_Improved()
@@ -79,7 +79,7 @@ public class RS_Algorithm_Improved implements RS_Algorithm {
 	//	zoek van alle tracks de luisteraars en zet deze in de lijst users
 		for (RS_Track t : tracks)
 		{
-			Collection<RS_User> tusers = RS_User.toRS_User(DB.getListeners(t)); //De luisteraars van track t
+			Collection<RS_User> tusers = DB.getListeners(t); //De luisteraars van track t
 			for(RS_User u : tusers)
 			{
 				if(topListeners.add(u))
@@ -138,7 +138,7 @@ public class RS_Algorithm_Improved implements RS_Algorithm {
 		{
 			try
 			{
-				Collection<RS_Track> currTracks = RS_Track.toRS_Track(DB.getTracks(u.getName()));
+				Collection<RS_Track> currTracks = DB.getTracks(u);
 				for(RS_Track track : currTracks)
 				{
 					if(rec.add(track))
