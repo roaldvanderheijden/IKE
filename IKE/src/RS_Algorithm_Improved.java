@@ -27,13 +27,21 @@ public class RS_Algorithm_Improved implements RS_Algorithm {
 		String results = "";
 
 		SortedArrayList<RS_User> topListeners = getTopListeners(tracks);
-		
-		
-
-//		topListeners.setComparator(comparators.userRating);
-//		topListeners.setComparator(new compareRating());
 
 		List<RS_Track> rec = getTopTracks(topListeners, 500);
+		Object[] trackList = tracks.toArray();
+		
+		//Remove all tracks we search on
+		for(int i =0 ; i<rec.size(); i++)
+		{
+			for(int j=0; j<trackList.length; j++)
+			{
+				if(trackList[j]!=null)
+					if(rec.get(i).getName().equals(((RS_Track) trackList[j]).getName()) &&
+							rec.get(i).getArtist().equals(((RS_Track) trackList[j]).getArtist()))
+								rec.remove(i);
+			}
+		}
 		
 			
 	//	voor het printen van de aanbevolen tracks
